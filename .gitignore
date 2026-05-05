@@ -1,0 +1,11 @@
+# Node
+node_modules/
+server/node_modules/
+server/data/
+
+# Build
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

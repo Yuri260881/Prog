@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ФотоЦентр — Учёт продаж</title>
+  <meta name="description" content="Система учёта продаж сети фото-центров ФотоСмайл">
+  <meta name="theme-color" content="#7c3aed">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- ═══ TOAST ═══ -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ═══ LOGIN SCREEN ═══ -->
+  <div id="login-screen" class="screen active">
+    <div class="login-wrapper">
+      <div class="login-card glass">
+        <div class="login-logo">
+          <div class="logo-icon">📷</div>
+          <h1>ФотоЦентр</h1>
+          <p class="login-subtitle">Система учёта продаж</p>
+        </div>
+        <form id="login-form" autocomplete="off">
+          <div class="form-group">
+            <label for="login-username">Логин</label>
+            <input type="text" id="login-username" placeholder="Введите логин" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Пароль</label>
+            <input type="password" id="login-password" placeholder="Введите пароль" required>
+          </div>
+          <div id="login-error" class="error-msg"></div>
+          <button type="submit" id="login-btn" class="btn btn-primary btn-full">
+            <span>Войти</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ EMPLOYEE SCREEN ═══ -->
+  <div id="employee-screen" class="screen">
+    <header class="app-header glass">
+      <div class="header-left">
+        <span class="logo-sm">📷</span>
+        <div>
+          <h2 id="emp-store-name">Магазин</h2>
+          <span class="header-role">Сотрудник</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="emp-user-name" class="user-badge"></span>
+        <button id="emp-logout" class="btn btn-ghost">Выйти</button>
+      </div>
+    </header>
+
+    <main class="emp-main">
+      <!-- Report Form -->
+      <section class="card glass" id="report-form-card">
+        <h3>📝 Новый отчёт</h3>
+        <form id="report-form">
+          <div class="form-group">
+            <label for="report-date">Дата</label>
+            <input type="date" id="report-date" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="r-total">Итого (₽)</label><input type="number" id="r-total" step="0.01" min="0" placeholder="0" required></div>
+            <div class="form-group"><label for="r-cash">Наличные (₽)</label><input type="number" id="r-cash" step="0.01" min="0" placeholder="0"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="r-card">Безнал (₽)</label><input type="number" id="r-card" step="0.01" min="0" placeholder="0"></div>
+            <div class="form-group"><label for="r-transfer">Перевод (₽)</label><input type="number" id="r-transfer" step="0.01" min="0" placeholder="0"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="r-sales">Кол-во продаж</label><input type="number" id="r-sales" min="0" placeholder="0"></div>
+            <div class="form-group"><label for="r-salary">Зарплата (₽)</label><input type="number" id="r-salary" step="0.01" min="0" placeholder="0"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="r-purchases">Закупки (₽)</label><input type="number" id="r-purchases" step="0.01" min="0" placeholder="0"></div>
+            <div class="form-group"><label for="r-writeoff">Списание и брак (₽)</label><input type="number" id="r-writeoff" step="0.01" min="0" placeholder="0"></div>
+          </div>
+          <button type="submit" id="report-submit" class="btn btn-primary btn-full">Отправить отчёт</button>
+        </form>
+      </section>
+
+      <!-- Stats + History -->
+      <section class="emp-right">
+        <div class="stats-row">
+          <div class="stat-card glass"><div class="stat-value" id="stat-month-total">0 ₽</div><div class="stat-label">Выручка за месяц</div></div>
+          <div class="stat-card glass"><div class="stat-value" id="stat-month-avg">0 ₽</div><div class="stat-label">Среднее в день</div></div>
+          <div class="stat-card glass"><div class="stat-value" id="stat-month-sales">0</div><div class="stat-label">Продаж за месяц</div></div>
+        </div>
+        <div class="card glass">
+          <h3>📊 История отчётов</h3>
+          <div class="table-wrap">
+            <table id="emp-history-table">
+              <thead><tr>
+                <th>Дата</th><th>Итого</th><th>Нал</th><th>Безнал</th><th>Перевод</th><th>Продажи</th><th>ЗП</th><th>Закупки</th><th>Списание</th>
+              </tr></thead>
+              <tbody id="emp-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ═══ ADMIN SCREEN ═══ -->
+  <div id="admin-screen" class="screen">
+    <header class="app-header glass">
+      <div class="header-left">
+        <span class="logo-sm">📷</span>
+        <div><h2>ФотоЦентр — Админ</h2><span class="header-role">Администратор</span></div>
+      </div>
+      <div class="header-right">
+        <span id="adm-user-name" class="user-badge"></span>
+        <button id="adm-logout" class="btn btn-ghost">Выйти</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="tabs glass">
+      <button class="tab active" data-tab="tab-reports">📋 Отчёты</button>
+      <button class="tab" data-tab="tab-charts">📈 Графики</button>
+      <button class="tab" data-tab="tab-compare">⚖️ Сравнение</button>
+      <button class="tab" data-tab="tab-manage">⚙️ Управление</button>
+    </nav>
+
+    <main class="adm-main">
+      <!-- TAB: Reports -->
+      <div id="tab-reports" class="tab-content active">
+        <div class="filters glass">
+          <div class="form-group"><label>От</label><input type="date" id="f-from"></div>
+          <div class="form-group"><label>До</label><input type="date" id="f-to"></div>
+          <div class="form-group"><label>Магазин</label><select id="f-store"><option value="">Все магазины</option></select></div>
+          <button id="f-apply" class="btn btn-primary">Показать</button>
+          <button id="f-export-excel" class="btn btn-accent">📥 Excel</button>
+          <button id="f-export-pdf" class="btn btn-accent">📄 PDF</button>
+        </div>
+        <div class="card glass">
+          <div class="table-wrap">
+            <table id="adm-reports-table">
+              <thead><tr>
+                <th>Дата</th><th>Магазин</th><th>Итого</th><th>Нал</th><th>Безнал</th><th>Перевод</th><th>Продажи</th><th>ЗП</th><th>Закупки</th><th>Списание</th><th>Действия</th>
+              </tr></thead>
+              <tbody id="adm-reports-body"></tbody>
+            </table>
+          </div>
+          <div id="adm-summary" class="summary-row"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Charts -->
+      <div id="tab-charts" class="tab-content">
+        <div class="filters glass">
+          <div class="form-group"><label>Магазин</label><select id="ch-store"><option value="">Все магазины</option></select></div>
+          <div class="form-group"><label>Период</label>
+            <select id="ch-period">
+              <option value="7">7 дней</option><option value="30" selected>30 дней</option><option value="90">90 дней</option><option value="365">Год</option>
+            </select>
+          </div>
+          <button id="ch-apply" class="btn btn-primary">Обновить</button>
+        </div>
+        <div class="card glass chart-card"><canvas id="chart-revenue"></canvas></div>
+        <div class="card glass chart-card"><canvas id="chart-sales"></canvas></div>
+      </div>
+
+      <!-- TAB: Compare -->
+      <div id="tab-compare" class="tab-content">
+        <div class="filters glass">
+          <div class="form-group"><label>Период</label>
+            <select id="cmp-period">
+              <option value="7">7 дней</option><option value="30" selected>30 дней</option><option value="90">90 дней</option><option value="365">Год</option>
+            </select>
+          </div>
+          <button id="cmp-apply" class="btn btn-primary">Обновить</button>
+        </div>
+        <div class="compare-grid">
+          <div class="card glass chart-card"><canvas id="chart-compare-revenue"></canvas></div>
+          <div class="card glass chart-card"><canvas id="chart-compare-sales"></canvas></div>
+        </div>
+      </div>
+
+      <!-- TAB: Management -->
+      <div id="tab-manage" class="tab-content">
+        <div class="manage-grid">
+          <!-- Users Management -->
+          <div class="card glass">
+            <h3>👥 Пользователи</h3>
+            <div class="table-wrap">
+              <table id="manage-users-table">
+                <thead><tr><th>Логин</th><th>Имя</th><th>Роль</th><th>Магазин</th><th>Действия</th></tr></thead>
+                <tbody id="manage-users-body"></tbody>
+              </table>
+            </div>
+            <hr class="divider">
+            <h4>Добавить пользователя</h4>
+            <form id="add-user-form">
+              <div class="form-row">
+                <div class="form-group"><label>Логин</label><input type="text" id="nu-username" required></div>
+                <div class="form-group"><label>Пароль</label><input type="text" id="nu-password" required></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Имя</label><input type="text" id="nu-name" required></div>
+                <div class="form-group"><label>Роль</label>
+                  <select id="nu-role"><option value="employee">Сотрудник</option><option value="admin">Администратор</option></select>
+                </div>
+              </div>
+              <div class="form-group"><label>Магазин</label><select id="nu-store"></select></div>
+              <button type="submit" class="btn btn-primary">Добавить</button>
+            </form>
+          </div>
+
+          <!-- Stores Management -->
+          <div class="card glass">
+            <h3>🏪 Магазины</h3>
+            <div class="table-wrap">
+              <table id="manage-stores-table">
+                <thead><tr><th>Название</th><th>Действия</th></tr></thead>
+                <tbody id="manage-stores-body"></tbody>
+              </table>
+            </div>
+            <hr class="divider">
+            <h4>Добавить магазин</h4>
+            <form id="add-store-form">
+              <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Название</label><input type="text" id="ns-name" required></div>
+                <button type="submit" class="btn btn-primary" style="align-self:flex-end">Добавить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Report Modal -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal glass">
+      <h3 id="modal-title">Редактировать отчёт</h3>
+      <form id="modal-form">
+        <input type="hidden" id="modal-id">
+        <div class="form-row">
+          <div class="form-group"><label>Итого</label><input type="number" id="m-total" step="0.01"></div>
+          <div class="form-group"><label>Наличные</label><input type="number" id="m-cash" step="0.01"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Безнал</label><input type="number" id="m-card" step="0.01"></div>
+          <div class="form-group"><label>Перевод</label><input type="number" id="m-transfer" step="0.01"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Продажи</label><input type="number" id="m-sales"></div>
+          <div class="form-group"><label>Зарплата</label><input type="number" id="m-salary" step="0.01"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Закупки</label><input type="number" id="m-purchases" step="0.01"></div>
+          <div class="form-group"><label>Списание</label><input type="number" id="m-writeoff" step="0.01"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="modal-cancel" class="btn btn-ghost">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div id="user-modal-overlay" class="modal-overlay">
+    <div class="modal glass">
+      <h3>Редактировать пользователя</h3>
+      <form id="user-modal-form">
+        <input type="hidden" id="um-id">
+        <div class="form-row">
+          <div class="form-group"><label>Логин</label><input type="text" id="um-username" required></div>
+          <div class="form-group"><label>Новый пароль</label><input type="text" id="um-password" placeholder="Оставьте пустым"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Имя</label><input type="text" id="um-name"></div>
+          <div class="form-group"><label>Роль</label><select id="um-role"><option value="employee">Сотрудник</option><option value="admin">Администратор</option></select></div>
+        </div>
+        <div class="form-group"><label>Магазин</label><select id="um-store"></select></div>
+        <div class="modal-actions">
+          <button type="button" id="user-modal-cancel" class="btn btn-ghost">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

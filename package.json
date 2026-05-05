@@ -1,0 +1,22 @@
+{
+  "name": "photo-center-sales",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "vite",
+    "server": "node server/index.js",
+    "build": "npm install --prefix server && vite build",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "concurrently": "^8.2.0"
+  }
+}
