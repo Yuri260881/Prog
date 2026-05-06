@@ -1,12 +1,9 @@
 {
   "name": "photo-center-server",
   "version": "1.0.0",
-  "scripts": {
-    "start": "node index.js"
-  },
   "dependencies": {
     "express": "^4.21.0",
-    "better-sqlite3": "^11.6.0",
+    "pg": "^8.13.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5"
   }
