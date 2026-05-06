@@ -73,14 +73,14 @@ app.get('/api/me', auth, async (req, res) => {
 /* ── Reports ──────────────────────────────────── */
 app.post('/api/reports', auth, async (req, res) => {
   try {
-    const { date, total, cash, card, transfer, sales_count, salary, purchases, write_off } = req.body;
+    const { date, total, cash, card, transfer, sales_count, salary, purchases, write_off, employee_name } = req.body;
     const store_id = req.user.store_id;
     if (!store_id) return res.status(400).json({ error: 'Нет привязки к магазину' });
 
     const { rows } = await query(
-      `INSERT INTO reports (store_id,user_id,date,total,cash,card,transfer,sales_count,salary,purchases,write_off)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
-      [store_id, req.user.id, date, total||0, cash||0, card||0, transfer||0, sales_count||0, salary||0, purchases||0, write_off||0]
+      `INSERT INTO reports (store_id,user_id,date,total,cash,card,transfer,sales_count,salary,purchases,write_off,employee_name)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+      [store_id, req.user.id, date, total||0, cash||0, card||0, transfer||0, sales_count||0, salary||0, purchases||0, write_off||0, employee_name||null]
     );
     res.json({ id: rows[0].id });
   } catch (err) {
@@ -111,6 +111,30 @@ app.get('/api/reports', auth, async (req, res) => {
       date: r.date instanceof Date ? r.date.toISOString().slice(0,10) : String(r.date).slice(0,10)
     }));
     res.json(result);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+/* ── Employee Analytics ───────────────────────── */
+app.get('/api/analytics/employees', auth, adminOnly, async (req, res) => {
+  try {
+    let q = `SELECT
+        COALESCE(r.employee_name, 'Не указан') as employee_name,
+        s.name as store_name, s.id as store_id,
+        COUNT(*)::int as days_worked,
+        SUM(r.total)::numeric as total_revenue,
+        SUM(r.sales_count)::int as total_sales,
+        ROUND(AVG(r.total),0)::numeric as avg_revenue,
+        ROUND(AVG(r.sales_count),1)::numeric as avg_sales
+      FROM reports r JOIN stores s ON r.store_id = s.id
+      WHERE r.employee_name IS NOT NULL AND r.employee_name != ''
+    `;
+    const p = []; let i = 1;
+    if (req.query.store_id) { q += ` AND r.store_id=$${i++}`; p.push(req.query.store_id); }
+    if (req.query.from)     { q += ` AND r.date>=$${i++}`; p.push(req.query.from); }
+    if (req.query.to)       { q += ` AND r.date<=$${i++}`; p.push(req.query.to); }
+    q += ` GROUP BY r.employee_name, s.name, s.id ORDER BY total_revenue DESC`;
+    const { rows } = await query(q, p);
+    res.json(rows.map(r => ({ ...r, total_revenue: +r.total_revenue, avg_revenue: +r.avg_revenue, avg_sales: +r.avg_sales })));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

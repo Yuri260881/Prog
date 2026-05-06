@@ -47,6 +47,7 @@ async function initDB() {
       salary NUMERIC NOT NULL DEFAULT 0,
       purchases NUMERIC NOT NULL DEFAULT 0,
       write_off NUMERIC NOT NULL DEFAULT 0,
+      employee_name TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(store_id, date)
     );
@@ -87,6 +88,8 @@ async function initDB() {
     console.log('✅ Пользователи созданы');
   }
 
+  // Add employee_name column if it doesn't exist yet (migration)
+  await query(`ALTER TABLE reports ADD COLUMN IF NOT EXISTS employee_name TEXT`);
   console.log('✅ База данных готова');
 }
 

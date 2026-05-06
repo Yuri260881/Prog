@@ -1,1 +1,1 @@
-fix: migrate from SQLite to PostgreSQL for persistent cloud storage
+add employee_name, analytics endpoint, Google Sheets import script
